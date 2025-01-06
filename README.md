@@ -30,10 +30,10 @@ cd phylo-df-concept
     - multi-library interoperation
       - highly optimized copying between Rust and Python  
       - dataframe protocol: https://data-apis.org/dataframe-protocol/latest/API.html
+    - transparent fetch from url, cloud providers (s3, google cloud, etc)
 - scripting-friendly and end-user extensible
 - memory efficient representation*
 - unified serialization and processing
-- dataframe libraries can transparently fetch from url, cloud providers (s3, google cloud, etc)
 
 _TODO claims marked with asterisk* should be benchmarked_
     1. phydf,
