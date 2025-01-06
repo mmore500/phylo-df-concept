@@ -12,35 +12,47 @@ cd phylo-df-concept
 ./submodules.sh
 ```
 
-# Objectives
+# Summary
 
-- fast load/save*
-- benefit from modern datframe tooling
+The goal of this document 
+- in-memory processing operations
+
+# Why a DataFrame-based tree representation?
+
+- scripting-friendly and end-user extensible
+- potential for composable, interoperable ecosystem
+    - R ecosystem's success with the `ape` data structure
+    - push this idea further, with fully tabular format
+- fast and highly portable load/save*
+    - e.g., `pandas.read_csv`, `polars.read_parquet`, `read.table`, etc.
+    - libraries will transparently fetch from url, cloud providers (s3, google cloud, etc)
+    - unified serialized and in-memory representations
+- benefit from modern tabular data formats
     - granular deserialization of selected columns (e.g., Parquet)
+    - compression configuration that is transparent to end-user (e.g., Parquet) 
+    - columnar compression for efficient storage (e.g., Parquet)*
+    - categorical strings for efficient storage (e.g., Parquet)
+    - explicit column typing (e.g., Parquet)
+    - options exist for both binary and text formats
+- benefit from modern high-performance dataframe tooling
+    - memory-efficient representation*
     - larger-than-memory streaming operations (e.g., Polars)*
     - distributed computing operations (e.g., Dask)*
     - multithreaded operations (e.g., Polars)*
-    - columnar compression for efficient storage (e.g., Parquet)*
-    - categorical strings for efficient storage (e.g., Parquet)
     - vectorized operations (e.g., NumPy)*
     - just-in-time compilation (e.g., Numba)*
-    - language interoperation
-      - e.g., zero-copy interop via reticulate and Arrow https://blog.djnavarro.net/posts/2022-09-09_reticulated-arrow/
-      - e.g., Polars between Rust and Python
+- rich interoperative ecosystem
+    - multi-language interoperation
+      - e.g., zero-copy interop between R and Python [via reticulate and Arrow](https://blog.djnavarro.net/posts/2022-09-09_reticulated-arrow/)
+      - e.g., zero-copy Polars DataFrames shared between Rust and Python
     - multi-library interoperation
-      - highly optimized copying between Rust and Python  
-      - dataframe protocol: https://data-apis.org/dataframe-protocol/latest/API.html
-    - transparent fetch from url, cloud providers (s3, google cloud, etc)
-- scripting-friendly and end-user extensible
-- memory efficient representation*
-- unified serialization and processing
+      - e.g., highly-optimized conversion, or even [zero copy](https://pythonspeed.com/articles/polars-pandas-interopability), interoperation between Polars and Pandas  
+      - e.g., [Python dataframe protocol](https://data-apis.org/dataframe-protocol/latest/API.html)
 
 _TODO claims marked with asterisk* should be benchmarked_
     1. phydf,
     2. alife v1.0,
     3. newick (treeswift? or compacttree?)
-
-Hopefully, this flexibility will replicate aspects of the R ecosystem's success with the `ape` datastructure
 
 # Questions
 - should `PREFIX_` be `alstd_`, `alst2_`, or `phydf_`
