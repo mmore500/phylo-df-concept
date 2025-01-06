@@ -85,24 +85,64 @@ _TODO claims marked with asterisk* should be benchmarked_
     - in-memory processing tools should assume working format and may raise an error if storage format data is passed
     - tools implementing `from_storage` transform are encouraged but not required to support full breadth of storage format (e.g., alifestd v1)
 
+# WORKING format
+
+- goal: support optimized processing
+- context: in-memory operations (e.g., `pd.DataFrame` `pl.DataFrame`)
+- taxon id MUST match row number (no `PREFIX_id` column)
+- MUST be topologically sorted (ancestors BEFORE descendants)
+- MUST be non-reticulating asexual tree(s)
+- MAY have multiple roots
+- PRESENCE of `PREFIX_origin_time` implies **rooted** tree; otherwise, **unrooted**
+- operations must respect TRANSIENT column rules, see below
+
 # TRANSIENT columns
 
-- prefixed with `__` (two underscores) or `___` (three underscores)
-- `___` must be dropped 
-   - i.e., are intended to be ephemeral
+- identified by column names prefixed with `__` (two underscores) or `___` (three underscores)
+- `___` (3 underscores) indicates the column is "scratch" and to be dropped at the conclusion of the current function (not passed to end-users)
+   - i.e., stronger ephemerality --- no need for re-use
 - `__` columns may be returned from functions in library or end-user code
    - can be used other library or end-user code
    - when present, `__` columns may be assumed to be valid and up-to-date 
 - `__` must be dropped by operations that mutate tree structure
     - unless calling user passes a `keep` override
-    - unless KNOWN to not be invalidated by mutation performed
+    - unless KNOWN to not be invalidated by particular mutation performed
     - unless recalculated/repaired as part of mutation operation
 - `__` must be dropped in `to_storage` transform
     - unless calling user passes a `keep` override
 - standardized "conventional" columns invalidated by changes in tree structure are prefixed with `__`
 - end-users or library authors may also prefix their own columns with `__`
 
-# working format vs alife phylogeny standard v1
+what should be treated as a transient column?
+- can be calculated on-demand from other columns
+- may be a supporting "ingredient" in follow-on calculation of interest
+    - e.g., "node depth from root," used as part of later calculation)
+- MAY have a standardized definition and prefixed with PREFIX_
+    - or, alternately, be bespoke/ad hoc (user/library-defined)
+- MAY become invalidated when tree is mutated
+    - therefore MUST be updated or deleted when tree is mutated
+
+# STORAGE format `-->` WORKING format transform
+
+- unpack and drop `ancestor_list`
+    - if >1 ancestor, a list of dataframes must be returned
+    - alternately, a NotSupported error may be thrown if this column is present
+- re-assign `id`s to be
+    - contiguous `0-n 
+    - topologically sorted (i.e., `ancestor_id` <= `id`)
+    - `id` == row number
+    - alternately, a NotSupported error may be thrown if the `id` or `PREFIX_id` column is present
+- drop `id` (or `PREFIX_id`) column
+- if `PREFIX_name` not provided, prefix conventional columns with `PREFIX_`
+    - e.g., `origin_time` -> `PREFIX_origin_time`
+    - if both `origin_time` and `PREFIX_origin_time` provided, keep as-is 
+
+# WORKING format `-->` STORAGE format transform
+
+- drop `__`-prefixed columns
+   - unless overridden to `keep` by caller 
+
+# WORKING format vs alife phylogeny standard v1
 
 - replace `ancestor_list` column with `ancestor_id` column
     - `ancestor_id` avoids complications (and large slowdown) in save/load and processing operations
@@ -115,98 +155,46 @@ _TODO claims marked with asterisk* should be benchmarked_
 - add explicit support/differentiation between rooted and unrooted trees
     - key for non-Alife use case
 
-# API design
+# API design suggestions for library authors
 
-- encouraged to have a `mutate` param, default `False` (data is copied before operations by default)
+- encouraged to accept a `mutate` param, default `False` (data is copied before mutating operations, unless `True`)
 - encouraged to return DataFrame by value
 - encouraged to accept `keep` param, that allows end users to prevent select transient columns from being dropped
+   - `keep` param should allow regex 
+- encouraged to drop all `___`-prefixed columns
+- encouraged to return same column names and data types, no matter what input data is passed
 - for Python, a function decorator that handles these operations is provided in standard support library
 
-- encouraged to prefix all columns added with distinct library SLUG_
+- encouraged to prefix all columns added with distinct library `SLUG_`
 - for columns added that may have a more general use case,
-    - encouraged to suggest column name for standardization (PREFIX_XYZ) and  
-    - list/link library into registry as implementing the creation of this column
+    - encouraged to suggest column name for standardization (`PREFIX_XYZ`) and  
+    - list/link library into registry as implementing the calculation of this column
+
+# Support for representation and storage on SEXUAL PEDIGREES
+
+ - i.e., scenarios where `taxa` may have >1 parent
+ - in WORKING FORMAT context, sexual pedigrees must be represented as a collection of discrete DataFrames 
+     - each dataframe is an independent asexual phylogeny
+     - e.g., separate matrilineal phylogeny and patrilineal phylogeny
+     - operations intended to explicitly support pedigrees therefore MUST take arguments as >1 discrete asexual dataframes
+         - (eg as a list of `n` dataframes or n discrete parameters)
+    - if number of parents varies, taxa with fewer than `k` parents should be represented as a root in the `k`th DataFrame 
+    - a taxon's row index MUST correspond exaclty between DataFrames
+- in STORAGE FORMAT context, pedigrees SHOuLD be 
+    - stored as `n` contiguous chunks within the same table, each chunk as an asexual tree;
+        - in this case, MUST be partitioned by integer index 0,1,..., `n` as column `PREFIX_pedigree_index`
+    - stored as `n` different tabular data files
+    - pedigress MAY instead be represented using alifestd v1 `ancestor_list`, although this is discouraged
+
+# Reserved names
+
+- non-conventional `PREFIX_`, `_PREFIX`, `__PREFIX` or `___PREFIX` columns are UNDEFINED BEHAVIOR
+- might also reserve `PREFIX1_`, `PREFIX2_`, `PREFIX3_` etc.
 
 # Questions/Problems
 
 - should `PREFIX_` be `alstd_`, `alst2_`, or `phydf_`?
 - should brand as alife standard phylogeny v2 or as alife asexual phylogeny standard or non-alife standard? 
+- should working format require independent trees to be in contiguous row sections?
+   - this would create problems with representing sexual pedigrees as distinct trees
 
-# Key Concepts
-
-- define 2 formats (WORKNG and STORAGE)
-- define standardized transform (WORKING -> STORAGE) and WORKING -> STORAGE
-
-- working format
-    - goal: support optimized processing
-    - context: in memory operations (e.g., `pd.DataFrame` `pl.DataFrame`)
-    - taxon id MUST match row number (no id column)
-    - MUST be topologically sorted (ancestors BEFORE descendants)
-    - MUST be non-reticulating asexual tree(s)
-    - MAY have multiple roots
-    - PRESENCE of origin_time implies rooted; otherwise, unrooted
-
-- working format: transient attributes
-    - semantically, can be calculated on-demand
-    - semantically, may be a supporting “ingredient” in calculation of interest (e.g., “node depth from root”)
-    - physically, is a named column in dataframe
-    - prefixed with `__`
-    - MAY have a standardized definition (to enable utility composability)
-    - MAY alternately be bespoke or ad hoc
-    - MAY become invalidated when tree is mutated
-        - MUST be updated or deleted when tree is mutated
-    - do not serialize (by default) 
-
-- storage format
-    - goal: flexibly support raw output from simulations or outside pipelines
-    - SUPERSET of working format
-    - SUPERSET of alifestd v1 format
-    - context: on disk format (e.g., `.parquet` `.csv` `.tsv` etc)
-    - PRESENCE of origin_time implies rooted; otherwise, unrooted
- 
- - sexual pedigrees (WORKING FORMAT)
-    - operations intended for scenarios where ids may have more than one parent
-    - MUST take arguments as >1 discrete asexual dataframes (eg as a list of dataframes or n discrete parameters)
-    - taxon row index MUST correspond between dataframes
-
-- sexual pedigrees (STORAGE FORMAT)
-    - SHOULD be stored as `n` contiguous chunks, each chunk as an asexual tree;
-        - in this case, MUST be partitioned by integer index 0,1,… as column `alstd_pedigree_index`
-    - MAY be stored as alifestd v1 ancestor list
-
-# problem
-- how to indicate stored data is un working format —- if not topologically sorted, id or alstd id col MUST be provided
-- suffix with _rX
-
-# Schematic
-
-ALSTD1.1
-- as specified on website
-- deprecated
-- fix empty list specification
-
-ALSTD2 storage format
-- optionally, includes ALSTD1.1 and ALSTD1 (otherwise, must error)
-- MUST include id or alstd_id column if NOT working format
-
-ALSTD2 working format 
-- is valid for storage format
-- MUST include 
-- may NOT include id or alstd_id column
-- non-conventional _*alstd_.* columns are UNDEFINED BEHAVIOR
-- all __alstd_ columns must be dropped or left in a valid state
-
-working to storage format transform
-- drop all __-prefixed columns
-
-
-storage to working format transform
-- sort topologically
-- assign contiguous ids
-- add alstd_ prefix
-- add extra underscore to _alstd_* items
-  - what about user _-prefixed columns?
-
-working format transforms
-- that affect the tree topology or branch lengths MUST drop all __ prefixes, unless it can be guaranteed that they will be updated
- 
