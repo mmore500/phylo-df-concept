@@ -51,10 +51,11 @@ The goal of this document is to establish conventions for representing phylogene
       - e.g., highly-optimized conversion, or even [zero copy](https://pythonspeed.com/articles/polars-pandas-interopability), interoperation between Polars and Pandas  
       - e.g., [Python dataframe protocol](https://data-apis.org/dataframe-protocol/latest/API.html)
 
-_TODO claims marked with asterisk* should be benchmarked_
-    1. phydf,
-    2. alife v1.0,
-    3. newick (treeswift? or compacttree?)
+_TODO claims marked with asterisk* should be benchmarked_ to compare
+1. proposed standard,
+2. alife standard v1.0 (with `ancestor_list`),
+3. newick format (treeswift? or compacttree?),
+4. nextrain's `.tsv` data (???)
 
 # Approach
 
