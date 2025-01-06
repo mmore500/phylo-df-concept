@@ -78,7 +78,8 @@ _TODO claims marked with asterisk* should be benchmarked_
     |                            |
     +----------------------------+
     ```
-- WORKING format may be detected by exclusion of `id` and `PREFIX_id` columns
+- WORKING format may be detected by lack of `id` and `PREFIX_id` columns
+    - non-WORKING format data MUST include `id` or `PREFIX_id` columns 
 - define standardized `from_storage` and `to_storage` transforms
     - Pandas, Polars, and R tools are provided implementing `from_storage`
     - in-memory processing tools should assume working format and may raise an error if storage format data is passed
