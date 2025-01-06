@@ -14,15 +14,17 @@ cd phylo-df-concept
 
 # Summary
 
-The goal of this document 
-- in-memory processing operations
+The goal of this document is to establish conventions for representing phylogenetic trees in tabular DataFrame formats to enable
+- high-performance in-memory processing operations,
+- space-efficient, fast save/load to tabular data formats, and
+- a decentralized, highly composable, and interoperable ecosystem of phylogeny libraries.
 
 # Why a DataFrame-based tree representation?
 
-- scripting-friendly and end-user extensible
+- DataFrames are scripting-friendly and end-user extensible
 - potential for composable, interoperable ecosystem
     - R ecosystem's success with the `ape` data structure
-    - push this idea further, with fully tabular format
+    - push this idea further, with a fully tabular format
 - fast and highly portable load/save*
     - e.g., `pandas.read_csv`, `polars.read_parquet`, `read.table`, etc.
     - libraries will transparently fetch from url, cloud providers (s3, google cloud, etc)
