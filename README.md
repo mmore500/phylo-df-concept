@@ -14,27 +14,33 @@ cd phylo-df-concept
 
 # Objectives
 
-- fast load/save
-    - TODO: benchmark loading and saving
-        1. phydf,
-        2. alife v1.0,
-        3. newick (treeswift?)
+- fast load/save*
 - benefit from modern datframe tooling
     - granular deserialization of selected columns (e.g., Parquet)
-    - larger-than-memory streaming operations (e.g., Polars)
-    - columnar compression (e.g., Parquet)
-    - vectorized operations (e.g., NumPy)
-    - just-in-time compilation (e.g., Numba)
+    - larger-than-memory streaming operations (e.g., Polars)*
+    - distributed computing operations (e.g., Dask)*
+    - multithreaded operations (e.g., Polars)*
+    - columnar compression for efficient storage (e.g., Parquet)*
+    - categorical strings for efficient storage (e.g., Parquet)
+    - vectorized operations (e.g., NumPy)*
+    - just-in-time compilation (e.g., Numba)*
     - language interoperation
       - e.g., zero-copy interop via reticulate and Arrow https://blog.djnavarro.net/posts/2022-09-09_reticulated-arrow/
       - e.g., Polars between Rust and Python
-    - library interoperation
+    - multi-library interoperation
       - highly optimized copying between Rust and Python  
-      - https://data-apis.org/dataframe-protocol/latest/API.html
-TODO
-- minimize memory allocations and overhead
-- scripting-friendly, end-user extensible
+      - dataframe protocol: https://data-apis.org/dataframe-protocol/latest/API.html
+- scripting-friendly and end-user extensible
+- memory efficient representation*
 - unified serialization and processing
+- dataframe libraries can transparently fetch from url, cloud providers (s3, google cloud, etc)
+
+_TODO claims marked with asterisk* should be benchmarked_
+    1. phydf,
+    2. alife v1.0,
+    3. newick (treeswift? or compacttree?)
+
+Hopefully, this flexibility will replicate aspects of the R ecosystem's success with the `ape` datastructure
 
 # Questions
 - should `PREFIX_` be `alstd_`, `alst2_`, or `phydf_`
