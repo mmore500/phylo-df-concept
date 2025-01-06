@@ -56,8 +56,79 @@ _TODO claims marked with asterisk* should be benchmarked_
     2. alife v1.0,
     3. newick (treeswift? or compacttree?)
 
-# Questions
-- should `PREFIX_` be `alstd_`, `alst2_`, or `phydf_`
+# Approach
+
+- define a more restrictive WORKING format to simplify/streamline processing operations
+   - requires `id` to equal row number
+   - requires taxa to be topologically sorted
+   - requires names of standard fields to be prefixed with PREFIX_
+   - includes concept of "TRANSIENT" columns (see below)
+- define a more flexible STORAGE format
+   - better accommodate raw data from simulation or inference pipelines  
+   - backwards compatibility with alifestd v1 data
+- WORKING and ALIFESTDV1 formats are distinct subsets of STORAGE format
+    ```
+    +------ storage format ------+
+    |                            |
+    |   +-- working format --+   |
+    |   +--------------------+   |                
+    |                            |
+    |   +-- alifestdv1 fmt --+   |
+    |   +--------------------+   |                
+    |                            |
+    +----------------------------+
+    ```
+- WORKING format may be detected by exclusion of `id` and `PREFIX_id` columns
+- define standardized `from_storage` and `to_storage` transforms
+    - Pandas, Polars, and R tools are provided implementing `from_storage`
+    - in-memory processing tools should assume working format and may raise an error if storage format data is passed
+    - tools implementing `from_storage` transform are encouraged but not required to support full breadth of storage format (e.g., alifestd v1)
+
+# TRANSIENT columns
+
+- prefixed with `__` (two underscores) or `___` (three underscores)
+- `___` must be dropped 
+   - i.e., are intended to be ephemeral
+- `__` columns may be returned from functions in library or end-user code
+   - can be used other library or end-user code
+   - when present, `__` columns may be assumed to be valid and up-to-date 
+- `__` must be dropped by operations that mutate tree structure
+    - unless calling user passes a `keep` override
+    - unless KNOWN to not be invalidated by mutation performed
+    - unless recalculated/repaired as part of mutation operation
+- `__` must be dropped in `to_storage` transform
+    - unless calling user passes a `keep` override
+- standardized "conventional" columns invalidated by changes in tree structure are prefixed with `__`
+- end-users or library authors may also prefix their own columns with `__`
+
+# working format vs alife phylogeny standard v1
+
+- replace `ancestor_list` column with `ancestor_id` column
+    - `ancestor_id` avoids complications (and large slowdown) in save/load and processing operations
+    - `ancestor_id` explicitly differentiates reticulated and non-reticulated trees (see SEXUAL PEDIGREES below)
+    - `ancestor_id` == `id` for root
+- enable strong assumptions about layout/indexing for easy/fast processing in WORKING format
+- use PREFIX_ to prevent name collisions
+- add concept of TRANSIENT columns
+    - flexibly and extensibly handle data invalidation by changes to tree structure
+- add explicit support/differentiation between rooted and unrooted trees
+    - key for non-Alife use case
+
+# API design
+
+- encouraged to have a `mutate` param, default `False` (data is copied before operations by default)
+- encouraged to return DataFrame by value
+- encouraged to accept `keep` param, that allows end users to prevent select transient columns from being dropped
+- for Python, a function decorator that handles these operations is provided in standard support library
+
+- encouraged to prefix all columns added with distinct library SLUG_
+- for columns added that may have a more general use case,
+    - encouraged to suggest column name for standardization (PREFIX_XYZ) and  
+    - list/link library into registry as implementing the creation of this column
+
+# Questions/Problems
+
+- should `PREFIX_` be `alstd_`, `alst2_`, or `phydf_`?
 - should brand as alife standard phylogeny v2 or as alife asexual phylogeny standard or non-alife standard? 
 
 # Key Concepts
