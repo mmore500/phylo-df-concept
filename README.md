@@ -31,7 +31,7 @@ The goal of this document is to establish conventions for representing phylogene
     - unified serialized and in-memory representations
 - benefit from modern tabular data formats
     - granular deserialization of selected columns (e.g., Parquet)
-    - compression configuration that is transparent to end-user (e.g., Parquet) 
+    - compression configuration that is transparent to end-user (e.g., Parquet)
     - columnar compression for efficient storage (e.g., Parquet)*
     - categorical strings for efficient storage (e.g., Parquet)
     - explicit column typing (e.g., Parquet)
@@ -48,7 +48,7 @@ The goal of this document is to establish conventions for representing phylogene
       - e.g., zero-copy interop between R and Python [via reticulate and Arrow](https://blog.djnavarro.net/posts/2022-09-09_reticulated-arrow/)
       - e.g., zero-copy Polars DataFrames shared between Rust and Python
     - multi-library interoperation
-      - e.g., highly-optimized conversion, or even [zero copy](https://pythonspeed.com/articles/polars-pandas-interopability), interoperation between Polars and Pandas  
+      - e.g., highly-optimized conversion, or even [zero copy](https://pythonspeed.com/articles/polars-pandas-interopability), interoperation between Polars and Pandas
       - e.g., [Python dataframe protocol](https://data-apis.org/dataframe-protocol/latest/API.html)
 
 _TODO claims marked with asterisk* should be benchmarked_ to compare
@@ -65,22 +65,22 @@ _TODO claims marked with asterisk* should be benchmarked_ to compare
    - requires names of standard fields to be prefixed with PREFIX_
    - includes concept of "TRANSIENT" columns (see below)
 - define a more flexible STORAGE format
-   - better accommodate raw data from simulation or inference pipelines  
+   - better accommodate raw data from simulation or inference pipelines
    - backwards compatibility with alifestd v1 data
 - WORKING and ALIFESTDV1 formats are distinct subsets of STORAGE format
     ```
     +------ storage format ------+
     |                            |
     |   +-- working format --+   |
-    |   +--------------------+   |                
+    |   +--------------------+   |
     |                            |
     |   +-- alifestdv1 fmt --+   |
-    |   +--------------------+   |                
+    |   +--------------------+   |
     |                            |
     +----------------------------+
     ```
 - WORKING format may be detected by lack of `id` and `PREFIX_id` columns
-    - non-WORKING format data MUST include `id` or `PREFIX_id` columns 
+    - non-WORKING format data MUST include `id` or `PREFIX_id` columns
 - define standardized `from_storage` and `to_storage` transforms
     - Pandas, Polars, and R tools are provided implementing `from_storage`
     - in-memory processing tools should assume working format and may raise an error if storage format data is passed
@@ -104,7 +104,7 @@ _TODO claims marked with asterisk* should be benchmarked_ to compare
    - i.e., stronger ephemerality --- no need for re-use
 - `__` columns may be returned from functions in library or end-user code
    - can be used other library or end-user code
-   - when present, `__` columns may be assumed to be valid and up-to-date 
+   - when present, `__` columns may be assumed to be valid and up-to-date
 - `__` must be dropped by operations that mutate tree structure
     - unless calling user passes a `keep` override
     - unless KNOWN to not be invalidated by particular mutation performed
@@ -129,19 +129,19 @@ what should be treated as a transient column?
     - if >1 ancestor, a list of dataframes must be returned
     - alternately, a NotSupported error may be thrown if this column is present
 - re-assign `id`s to be
-    - contiguous `0-n 
+    - contiguous `0-n
     - topologically sorted (i.e., `ancestor_id` <= `id`)
     - `id` == row number
     - alternately, a NotSupported error may be thrown if the `id` or `PREFIX_id` column is present
 - drop `id` (or `PREFIX_id`) column
 - if `PREFIX_name` not provided, prefix conventional columns with `PREFIX_`
     - e.g., `origin_time` -> `PREFIX_origin_time`
-    - if both `origin_time` and `PREFIX_origin_time` provided, keep as-is 
+    - if both `origin_time` and `PREFIX_origin_time` provided, keep as-is
 
 # WORKING format `-->` STORAGE format transform
 
 - drop `__`-prefixed columns
-   - unless overridden to `keep` by caller 
+   - unless overridden to `keep` by caller
 
 # WORKING format vs alife phylogeny standard v1
 
@@ -161,27 +161,27 @@ what should be treated as a transient column?
 - encouraged to accept a `mutate` param, default `False` (data is copied before mutating operations, unless `True`)
 - encouraged to return DataFrame by value
 - encouraged to accept `keep` param, that allows end users to prevent select transient columns from being dropped
-   - `keep` param should allow regex 
+   - `keep` param should allow regex
 - encouraged to drop all `___`-prefixed columns
 - encouraged to return same column names and data types, no matter what input data is passed
 - for Python, a function decorator that handles these operations is provided in standard support library
 
 - encouraged to prefix all columns added with distinct library `SLUG_`
 - for columns added that may have a more general use case,
-    - encouraged to suggest column name for standardization (`PREFIX_XYZ`) and  
+    - encouraged to suggest column name for standardization (`PREFIX_XYZ`) and
     - list/link library into registry as implementing the calculation of this column
 
 # Support for representation and storage on SEXUAL PEDIGREES
 
  - i.e., scenarios where `taxa` may have >1 parent
- - in WORKING FORMAT context, sexual pedigrees must be represented as a collection of discrete DataFrames 
+ - in WORKING FORMAT context, sexual pedigrees must be represented as a collection of discrete DataFrames
      - each dataframe is an independent asexual phylogeny
      - e.g., separate matrilineal phylogeny and patrilineal phylogeny
      - operations intended to explicitly support pedigrees therefore MUST take arguments as >1 discrete asexual dataframes
          - (eg as a list of `n` dataframes or n discrete parameters)
-    - if number of parents varies, taxa with fewer than `k` parents should be represented as a root in the `k`th DataFrame 
+    - if number of parents varies, taxa with fewer than `k` parents should be represented as a root in the `k`th DataFrame
     - a taxon's row index MUST correspond exaclty between DataFrames
-- in STORAGE FORMAT context, pedigrees SHOuLD be 
+- in STORAGE FORMAT context, pedigrees SHOuLD be
     - stored as `n` contiguous chunks within the same table, each chunk as an asexual tree;
         - in this case, MUST be partitioned by integer index 0,1,..., `n` as column `PREFIX_pedigree_index`
     - stored as `n` different tabular data files
@@ -195,7 +195,6 @@ what should be treated as a transient column?
 # Questions/Problems
 
 - should `PREFIX_` be `alstd_`, `alst2_`, or `phydf_`?
-- should brand as alife standard phylogeny v2 or as alife asexual phylogeny standard or non-alife standard? 
+- should brand as alife standard phylogeny v2 or as alife asexual phylogeny standard or non-alife standard?
 - should working format require independent trees to be in contiguous row sections?
    - this would create problems with representing sexual pedigrees as distinct trees
-
