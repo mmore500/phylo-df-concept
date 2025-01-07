@@ -195,6 +195,7 @@ these two allow iterating over all children (like a linked list), shoud be set t
 
 - `PREFIX_origin_time`
 - `PREFIX_edge_time`
+- `PREFIX_taxon_label`
 
 TODO scrape alifestd_* functions [here](https://github.com/mmore500/hstrat/tree/e85acde9566472ce2bb1e54e21e0e977084cf26b/hstrat/_auxiliary_lib) for column names used
 
