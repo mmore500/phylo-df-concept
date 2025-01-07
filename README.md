@@ -187,6 +187,17 @@ what should be treated as a transient column?
     - stored as `n` different tabular data files
     - pedigress MAY instead be represented using alifestd v1 `ancestor_list`, although this is discouraged
 
+# Conventional columns
+
+these two allow iterating over all children (like a linked list), shoud be set to `id` of taxon if has no children or has no next sibling (is "last" child):
+- `PREFIX_first_child_id`
+- `PREFIX_next_siblng_id`
+
+- `PREFIX_origin_time`
+- `PREFIX_edge_time`
+
+TODO scrape alifestd_* functions [here](https://github.com/mmore500/hstrat/tree/e85acde9566472ce2bb1e54e21e0e977084cf26b/hstrat/_auxiliary_lib) for column names used
+
 # Reserved names
 
 - non-conventional `PREFIX_`, `_PREFIX`, `__PREFIX` or `___PREFIX` columns are UNDEFINED BEHAVIOR
