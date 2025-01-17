@@ -95,6 +95,7 @@ _TODO claims marked with asterisk* should be benchmarked_ to compare
 - MUST be non-reticulating asexual tree(s)
 - MAY have multiple roots
 - PRESENCE of `PREFIX_origin_time` implies **rooted** tree; otherwise, **unrooted**
+    - better idea: `is_root` column
 - operations must respect TRANSIENT column rules, see below
 
 # TRANSIENT columns
