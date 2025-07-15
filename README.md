@@ -57,6 +57,18 @@ _TODO claims marked with asterisk* should be benchmarked_ to compare
 3. newick format (treeswift? or compacttree?),
 4. nextrain's `.tsv` data (???)
 
+# Microbenchmarks
+- finding MRCA
+- pruning/sampling
+- triplet operations (3 tips, which 2 are more related)
+- tree metrics (based on popularity?)
+- save/load
+- iterate (3 iteration orders)
+- set up child list
+- find parent, find children
+- tip to root lineage
+- minimal distance to root, minimal distance to tip
+
 # Approach
 
 - define a more restrictive WORKING format to simplify/streamline processing operations
