@@ -25,6 +25,7 @@ teeplot==1.4.2
 tqdm==4.64.1
 uv==0.4.20
 watermark==2.4.3
+requests==2.34.0
 
 # https://github.com/sphinx-doc/sphinx/issues/10291
 Jinja2<3.1
